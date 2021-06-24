@@ -1,0 +1,350 @@
+[
+    {
+        "id": "main.flow",
+        "type": "tab",
+        "label": "main",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "test.flow",
+        "type": "tab",
+        "label": "test",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "21efbb63.78c354",
+        "type": "EventListener",
+        "z": "main.flow",
+        "name": "GET/weather/report",
+        "provider": "aws",
+        "eventSource": "api",
+        "dynamodbOperation": "",
+        "apiMethod": "get",
+        "apiUrl": "/weather/report",
+        "albMethod": "any",
+        "albUrl": "",
+        "bucketName": "",
+        "event": "s3:ObjectCreated:*",
+        "cognitoTrigger": "any",
+        "keventSource": "",
+        "kapiMethod": "any",
+        "kapiUrl": "",
+        "kcronexpression": "",
+        "x": 42.5,
+        "y": 200,
+        "wires": [
+            [
+                "11bc7d59.b42723"
+            ]
+        ],
+        "caname": "event-handler",
+        "category": "general"
+    },
+    {
+        "id": "11bc7d59.b42723",
+        "type": "Logger",
+        "z": "main.flow",
+        "name": "Log_Entity",
+        "level": "INFO",
+        "message": "'Request received ' & msg.header.event.Records[0].queryStringParameters.location",
+        "x": 142.5,
+        "y": 200,
+        "wires": [
+            [
+                "7e903382.4f523c"
+            ]
+        ],
+        "caname": "logger",
+        "category": "logging"
+    },
+    {
+        "id": "7e903382.4f523c",
+        "type": "Set-Property",
+        "z": "main.flow",
+        "name": "Set-Property",
+        "rules": [
+            {
+                "t": "set",
+                "p": "location",
+                "pt": "camsg",
+                "to": "header.event.Records[0].queryStringParameters.location",
+                "tot": "camsg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 242.5,
+        "y": 200,
+        "wires": [
+            [
+                "e898b4c1.0ce298"
+            ]
+        ],
+        "caname": "setproperty",
+        "category": "transformation"
+    },
+    {
+        "id": "e898b4c1.0ce298",
+        "type": "HTTP Req",
+        "z": "main.flow",
+        "name": "Invoke_OpenWeatherAPI",
+        "method": "GET",
+        "ret": "obj",
+        "url": "'http://api.openweathermap.org/data/2.5/weather?zip=' & msg.location & '&appid=d018310fc953f32f6c7b98c16a984ff1'",
+        "responseTimeout": "",
+        "headers": {},
+        "authtype": "none",
+        "secUser": "",
+        "secPassword": "",
+        "secToken": "",
+        "x": 382.5,
+        "y": 200,
+        "wires": [
+            [
+                "f05b622f.fb7c1"
+            ]
+        ],
+        "caname": "httprequest",
+        "category": "web"
+    },
+    {
+        "id": "f05b622f.fb7c1",
+        "type": "Switch",
+        "z": "main.flow",
+        "name": "Switch",
+        "property": "msg.payload.weather[0].main",
+        "propertyType": "",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Fog",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Clear",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Mist",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "repair": false,
+        "outputs": 4,
+        "x": 482.5,
+        "y": 200,
+        "wires": [
+            [
+                "f0213c3f.7f38a"
+            ],
+            [
+                "59cc3894.3b8178"
+            ],
+            [
+                "95ea8e78.79d1d"
+            ],
+            [
+                "813c0e9a.b4807"
+            ]
+        ],
+        "caname": "switch",
+        "category": "routing"
+    },
+    {
+        "id": "f0213c3f.7f38a",
+        "type": "Datamapper",
+        "z": "main.flow",
+        "name": "Mapping_fog",
+        "datamappertype": " {\"Weather\" : \"Its foggy\", \"Advice\" : \"Drive carefully\"}",
+        "testdataeditortype": "{\n    \"payload\": \"hello world\"\n}",
+        "x": 602.5,
+        "y": 80,
+        "wires": [
+            [
+                "e876b4f9.bffb08"
+            ]
+        ],
+        "caname": "datamapper",
+        "category": "transformation"
+    },
+    {
+        "id": "59cc3894.3b8178",
+        "type": "Datamapper",
+        "z": "main.flow",
+        "name": "Mapping_clear",
+        "datamappertype": "{\"Weather\" : \"Its Clear\", \"Advice\" : \"Good day to plan for a trip\"}",
+        "testdataeditortype": "{\n    \"payload\": \"hello world\"\n}",
+        "x": 602.5,
+        "y": 200,
+        "wires": [
+            [
+                "e876b4f9.bffb08"
+            ]
+        ],
+        "caname": "datamapper",
+        "category": "transformation"
+    },
+    {
+        "id": "95ea8e78.79d1d",
+        "type": "Datamapper",
+        "z": "main.flow",
+        "name": "Mapping_mist",
+        "datamappertype": "{\"Weather\" : \"Its Misty\", \"Advice\" : \"Drive carefully. Check your wiper\"}\n ",
+        "testdataeditortype": "{\n    \"payload\": \"hello world\"\n}",
+        "x": 602.5,
+        "y": 320,
+        "wires": [
+            [
+                "e876b4f9.bffb08"
+            ]
+        ],
+        "caname": "datamapper",
+        "category": "transformation"
+    },
+    {
+        "id": "813c0e9a.b4807",
+        "type": "Datamapper",
+        "z": "main.flow",
+        "name": "Mapping_notavailable",
+        "datamappertype": "{\"Weather\" : \"Not available\", \"Advice\" : \"Not available\"}\n ",
+        "testdataeditortype": "{\n    \"payload\": \"hello world\"\n}",
+        "x": 602.5,
+        "y": 460,
+        "wires": [
+            [
+                "e876b4f9.bffb08"
+            ]
+        ],
+        "caname": "datamapper",
+        "category": "transformation"
+    },
+    {
+        "id": "e876b4f9.bffb08",
+        "type": "EventListener-End",
+        "z": "main.flow",
+        "name": "Sucess",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "payload": "msg.payload",
+        "x": 762.5,
+        "y": 260,
+        "wires": [],
+        "caname": "eventlistenerend",
+        "category": "general"
+    },
+    {
+        "id": "52b3a1ad.d374f",
+        "type": "catch",
+        "z": "main.flow",
+        "name": "catch",
+        "scope": null,
+        "uncaught": false,
+        "x": 100,
+        "y": 440,
+        "wires": [
+            [
+                "ad6638cd.0e1398"
+            ]
+        ],
+        "caname": "catch",
+        "category": "exception"
+    },
+    {
+        "id": "ad6638cd.0e1398",
+        "type": "Logger",
+        "z": "main.flow",
+        "name": "Log_error",
+        "level": "INFO",
+        "message": "msg.error",
+        "x": 240,
+        "y": 440,
+        "wires": [
+            [
+                "cd69926f.aee09"
+            ]
+        ],
+        "caname": "logger",
+        "category": "logging"
+    },
+    {
+        "id": "cd69926f.aee09",
+        "type": "EventListener-End",
+        "z": "main.flow",
+        "name": "Failed",
+        "statusCode": "500",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "payload": "msg.error.message",
+        "x": 342.5,
+        "y": 440,
+        "wires": [],
+        "caname": "eventlistenerend",
+        "category": "general"
+    },
+    {
+        "id": "f979897a.3f8738",
+        "type": "HTTPTestCase",
+        "z": "test.flow",
+        "name": "GET:/weather/report",
+        "method": "GET",
+        "path": "/weather/report?location=110001,in",
+        "headers": {},
+        "authtype": "none",
+        "secUser": "",
+        "secPassword": "",
+        "secToken": "",
+        "payload": "",
+        "x": 62.5,
+        "y": 160,
+        "wires": [
+            [
+                "ebe72325.cc14d"
+            ]
+        ],
+        "caname": "http-test-case",
+        "category": "testing"
+    },
+    {
+        "id": "ebe72325.cc14d",
+        "type": "Assertion",
+        "z": "test.flow",
+        "name": "Assertion",
+        "selector": "statusCode",
+        "property": "",
+        "comparison": "equals",
+        "value": "200",
+        "x": 182.5,
+        "y": 160,
+        "wires": [
+            [
+                "7e40c9c6.9971c8"
+            ]
+        ],
+        "caname": "test-assertion",
+        "category": "testing"
+    },
+    {
+        "id": "7e40c9c6.9971c8",
+        "type": "TestCaseEnd",
+        "z": "test.flow",
+        "name": "TestCaseEnd",
+        "x": 302.5,
+        "y": 160,
+        "wires": [],
+        "caname": "test-case-end",
+        "category": "testing"
+    }
+]
